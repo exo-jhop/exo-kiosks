@@ -30,7 +30,7 @@ class CategoryResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('slug')
                     ->required()
-                    ->unique()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255),
                 Forms\Components\FileUpload::make('image_path')
                     ->label('Image')
