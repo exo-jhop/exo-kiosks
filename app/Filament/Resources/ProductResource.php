@@ -59,6 +59,9 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('id')
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\ImageColumn::make('image_path')
+                    ->label('Image')
+                    ->disk('public'),
                 Tables\Columns\TextColumn::make('name')
                     ->sortable()
                     ->searchable(),
