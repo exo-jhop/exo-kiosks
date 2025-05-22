@@ -17,13 +17,22 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Forms\Components\TextInput::make('order_number')
+                    ->required()
+                    ->unique(Order::class, 'order_number', ignoreRecord: true),
+                Forms\Components\TextInput::make('customer_name')
+                    ->required(),
+                Forms\Components\TextInput::make('total_amount')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\DatePicker::make('order_date')
+                    ->required(),
             ]);
     }
 
