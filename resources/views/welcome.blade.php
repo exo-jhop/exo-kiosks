@@ -22,8 +22,8 @@
 <body>
     <header class="w-full lg:max-w-4xl max-w-[335px] text-sm mb-6 not-has-[nav]:hidden">
     </header>
-    <div
-        class="flex items-center justify-center w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
+    <div class="w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
+
         <main class="mt-6">
             <livewire:kiosk-view />
         </main>
