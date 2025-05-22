@@ -19,6 +19,10 @@ class ProductResource extends Resource
 
     protected static ?string $navigationIcon = 'polaris-product-icon';
 
+    protected static ?string $navigationGroup = 'Master Data';
+
+    protected static ?string $navigationParentItem = 'Categories';
+
     public static function form(Form $form): Form
     {
         return $form
