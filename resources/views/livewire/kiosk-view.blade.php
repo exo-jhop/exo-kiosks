@@ -1,5 +1,5 @@
 <div class="flex h-screen">
-    <div class="w-1/4 bg-white shadow-lg overflow-y-auto h-full">
+    <div class="w-1/4 bg-white shadow-lg overflow-y-auto h-full thin-scrollbar">
 
         <div class="p-4 border-b border-gray-200">
             <h2 class="text-2xl font-bold text-gray-800">Categories</h2>
@@ -40,8 +40,13 @@
     </div>
 
     <div class="w-3/4 p-6 overflow-y-auto h-full">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">{{ $selectedCategoryName ?? 'All Products' }}</h2>
-
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+            @if ($selectedCategoryId && $selectedCategoryImagePath)
+                <img src="{{ asset('storage/' . $selectedCategoryImagePath) }}" alt="{{ $selectedCategoryName }}"
+                    class="w-10 h-10 object-cover rounded-full">
+            @endif
+            {{ $selectedCategoryName ?? 'All Products' }}
+        </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @forelse ($products as $product)
                 <div
@@ -63,7 +68,7 @@
                         <h3 class="font-semibold text-lg mb-1">{{ $product->name }}</h3>
                         <p class="text-gray-600 text-sm mb-2">{{ $product->description }}</p>
                         <div class="flex justify-between items-center mt-3">
-                            <span class="font-bold text-gray-800">${{ number_format($product->price, 2) }}</span>
+                            <span class="font-bold text-gray-800">₱{{ number_format($product->price, 2) }}</span>
                         </div>
                     </div>
                 </div>

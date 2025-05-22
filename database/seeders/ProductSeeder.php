@@ -15,50 +15,19 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-         $products = [
-            [
-                'name' => 'Jolly Burger',
-                'price' => 49.00,
-                'stock' => 50,
-                'sku' => 'Burger',
-                'category_name' => 'Burger',
-            ],
-            [
-                'name' => 'Chicken Joy',
-                'price' => 75.00,
-                'stock' => 200,
-                'sku' => 'C1',
-                'category_name' => 'Chicken',
-            ],
-            [
-                'name' => 'Palabok',
-                'price' => 90.00,
-                'stock' => 30,
-                'sku' => 'P1',
-                'category_name' => 'Pasta',
-            ],
-            [
-                'name' => 'Gravy',
-                'price' => 15.00,
-                'stock' => 30,
-                'sku' => 'Gravy',
-                'category_name' => 'Extras',
-            ],
-        ];
+        $categories = Category::all();
 
-        foreach ($products as $data) {
-            $category = Category::where('name', $data['category'])->first();
-
-            if ($category) {
+        foreach ($categories as $category) {
+            for ($i = 1; $i <= 5; $i++) {
                 Product::create([
-                    'name' => $data['name'],
-                    'slug' => Str::slug($data['name']),
-                    'price' => $data['price'],
-                    'stock' => $data['stock'],
-                    'sku' => $data['sku'],
-                    'category_id' => $category->id,
+                    'name' => "Product {$i} in {$category->name}",
+                    'slug' => Str::slug("Product {$i} in {$category->name}"),
                     'image_path' => null,
-                    'description' => null,
+                    'description' => "Description for Product {$i} in {$category->name}",
+                    'price' => rand(100, 1000),
+                    'category_id' => $category->id,
+                    'sku' => "SKU-{$i}-{$category->id}",
+                    'stock' => rand(1, 100),
                     'is_active' => true,
                 ]);
             }

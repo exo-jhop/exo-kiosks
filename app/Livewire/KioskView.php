@@ -12,6 +12,7 @@ class KioskView extends Component
     public $selectedCategoryId = null;
     public $products = [];
     public $selectedCategoryName = 'All Products';
+    public $selectedCategoryImagePath;
 
     public function mount()
     {
@@ -30,12 +31,15 @@ class KioskView extends Component
         if ($this->selectedCategoryId) {
             $category = Category::find($this->selectedCategoryId);
             $this->selectedCategoryName = $category->name;
+            $this->selectedCategoryImagePath = $category->image_path;
             $this->products = $category->products;
         } else {
             $this->selectedCategoryName = 'All Products';
+            $this->selectedCategoryImagePath = null;
             $this->products = Product::all();
         }
     }
+
 
     public function render()
     {

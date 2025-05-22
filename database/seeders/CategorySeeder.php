@@ -15,10 +15,15 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            'Burger',
-            'Chicken',
-            'Pasta',
-            'Extras',
+            'Main Meals',
+            'Burgers & Sandwiches',
+            'Sides',
+            'Drinks & Desserts',
+            'Value Meals / Combo Meals',
+            'Kids Meals',
+            'Group Meals / Bucket Treats',
+            'Mix & Match / Build Your Own Meal',
+
         ];
 
         foreach ($categories as $name) {
