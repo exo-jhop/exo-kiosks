@@ -15,22 +15,37 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = Category::all();
-
-        foreach ($categories as $category) {
-            for ($i = 1; $i <= 5; $i++) {
-                Product::create([
-                    'name' => "Product {$i} in {$category->name}",
-                    'slug' => Str::slug("Product {$i} in {$category->name}"),
-                    'image_path' => null,
-                    'description' => "Description for Product {$i} in {$category->name}",
-                    'price' => rand(100, 1000),
-                    'category_id' => $category->id,
-                    'sku' => "SKU-{$i}-{$category->id}",
-                    'stock' => rand(1, 100),
-                    'is_active' => true,
-                ]);
-            }
-        }
+        Product::insert([
+            [
+                'name' => 'Jolly Combo',
+                'slug' => Str::slug('jolly-combo'),
+                'image_path' => null,
+                'category_id' => Category::where('name', 'Main Meals')->first()->id,
+                'price' => 10.99,
+                'description' => 'A delicious Jolly Combo meal with chicken, rice, and gravy.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Cheeseburger',
+                'slug' => Str::slug('cheeseburger'),
+                'image_path' => null,
+                'category_id' => Category::where('name', 'Burgers & Sandwiches')->first()->id,
+                'price' => 5.99,
+                'description' => 'A delicious cheeseburger with lettuce, tomato, and cheese.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'French Fries',
+                'slug' => Str::slug('french-fries'),
+                'image_path' => null,
+                'category_id' => Category::where('name', 'Sides')->first()->id,
+                'price' => 2.99,
+                'description' => 'Crispy golden french fries.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 }

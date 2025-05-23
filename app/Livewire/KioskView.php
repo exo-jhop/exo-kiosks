@@ -14,10 +14,26 @@ class KioskView extends Component
     public $selectedCategoryName = 'All Products';
     public $selectedCategoryImagePath;
 
+    public $showProductModal = false;
+    public $selectedProduct;
+    public $quantity = 1;
+
     public function mount()
     {
         $this->categories = Category::all();
         $this->loadProducts();
+    }
+
+    public function openProductModal($productId)
+    {
+        $this->selectedProduct = Product::find($productId);
+        $this->quantity = 1;
+        $this->showProductModal = true;
+    }
+
+    public function closeProductModal()
+    {
+        $this->showProductModal = false;
     }
 
     public function selectCategory($categoryId)

@@ -9,6 +9,9 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @livewireScripts
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
@@ -17,16 +20,22 @@
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 </head>
 
 <body>
-    <header class="w-full lg:max-w-4xl max-w-[335px] text-sm mb-6 not-has-[nav]:hidden">
-    </header>
-    <div class="w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
-        <main>
-            <livewire:kiosk-view />
-        </main>
-    </div>
+    <header></header>
+
+    <main>
+        <livewire:kiosk-view />
+    </main>
+    @livewireScripts
+
 </body>
+
 
 </html>

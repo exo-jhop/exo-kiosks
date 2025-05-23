@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -14,26 +15,36 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = [
-            'Main Meals',
-            'Burgers & Sandwiches',
-            'Sides',
-            'Drinks & Desserts',
-            'Value Meals / Combo Meals',
-            'Kids Meals',
-            'Group Meals / Bucket Treats',
-            'Mix & Match / Build Your Own Meal',
-
-        ];
-
-        foreach ($categories as $name) {
-            DB::table('categories')->insert([
-                'name' => $name,
-                'slug' => Str::slug($name),
+        Category::insert([
+            [
+                'name' => 'Main Meals',
+                'slug' => Str::slug('main-meals'),
                 'image_path' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
-        }
+            ],
+            [
+                'name' => 'Burgers & Sandwiches',
+                'slug' => Str::slug('Burgers & Sandwiches'),
+                'image_path' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Sides',
+                'slug' => Str::slug('Sides'),
+                'image_path' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Drinks & Desserts',
+                'slug' => Str::slug('Drinks & Desserts'),
+                'image_path' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+        ]);
     }
 }
