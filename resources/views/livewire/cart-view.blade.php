@@ -75,17 +75,17 @@
                             Pay at the Counter
                         </button>
 
-                        <button wire:click="confirmCheckout('cashless')"
-                            class="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white text-lg font-medium rounded-lg transition-colors">
-                            💳 Pay with Card / Mobile
+                        <button disabled wire:click="confirmCheckout('cashless')"
+                            class="w-full px-4 py-3 bg-gray-400 text-white text-lg font-medium rounded-lg cursor-not-allowed opacity-60">
+                            Pay with Card / Ewallet
                             <p class="text-xs mt-1 text-gray-300">(Tap, Swipe, QR, or Digital Wallet)</p>
                         </button>
+                        <p class="mt-2 text-sm text-red-600 font-semibold">Payment method not available right now.</p>
+
 
                     </div>
                 </div>
             @endif
-
-
         </div>
     @else
         <div class="text-center text-gray-500 text-lg">
