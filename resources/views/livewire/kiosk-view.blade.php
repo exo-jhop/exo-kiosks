@@ -50,13 +50,19 @@
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 @forelse ($products as $product)
-                    <div
+                    <div wire:key="product-{{ $product->id }}"
                         class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
                         <div class="h-48 bg-gray-200 flex items-center justify-center">
                             @if ($product->image_path)
-                                <img src="{{ asset('storage/' . $product->image_path) }}" alt="{{ $product->name }}"
-                                    class="h-full w-full object-cover cursor-pointer"
-                                    wire:click="openProductModal({{ $product->id }})">
+                                @if (Str::startsWith($product->image_path, 'http'))
+                                    <img src="{{ $product->image_path }}" alt="{{ $product->name }}"
+                                        class="h-full w-full object-cover cursor-pointer"
+                                        wire:click="openProductModal({{ $product->id }})">
+                                @else
+                                    <img src="{{ asset('storage/' . $product->image_path) }}"
+                                        alt="{{ $product->name }}" class="h-full w-full object-cover cursor-pointer"
+                                        wire:click="openProductModal({{ $product->id }})">
+                                @endif
                             @else
                                 <svg class="h-20 w-20 text-gray-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -81,37 +87,51 @@
                 @endforelse
             </div>
         </div>
-    </div>
-    <div @class([
-        'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300',
-        'hidden' => !$showProductModal || !$selectedProduct,
-    ])>
-        @if ($selectedProduct)
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
-                <button class="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
-                    wire:click="closeProductModal">✕</button>
+        <div @class([
+            'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300',
+            'hidden' => !$showProductModal || !$selectedProduct,
+        ])
+            wire:key="product-modal-{{ $selectedProduct ? $selectedProduct->id : 'none' }}">
+            @if ($selectedProduct)
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+                    <button class="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
+                        wire:click="closeProductModal">✕</button>
 
-                <div class="flex gap-4">
-                    <img src="{{ asset('storage/' . $selectedProduct->image_path) }}"
-                        class="w-40 h-40 object-cover rounded-lg" alt="{{ $selectedProduct->name }}">
-                    <div>
-                        <h3 class="text-xl font-bold mb-2">{{ $selectedProduct->name }}</h3>
-                        <p class="text-gray-600 mb-4">{{ $selectedProduct->description }}</p>
-                        <p class="font-semibold text-gray-800 mb-4">₱{{ number_format($selectedProduct->price, 2) }}
-                        </p>
+                    <div class="flex gap-4">
+                        <img src="{{ asset('storage/' . $selectedProduct->image_path) }}"
+                            class="w-40 h-40 object-cover rounded-lg" alt="{{ $selectedProduct->name }}">
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">{{ $selectedProduct->name }}</h3>
+                            <p class="text-gray-600 mb-4">{{ $selectedProduct->description }}</p>
+                            <p class="font-semibold text-gray-800 mb-4">
+                                ₱{{ number_format($selectedProduct->price, 2) }}
+                            </p>
 
-                        <div class="flex items-center gap-2 mb-4">
-                            <label for="quantity" class="text-sm font-medium text-gray-700">Quantity:</label>
-                            <input type="number" id="quantity" min="1" wire:model="quantity"
-                                class="w-20 border border-gray-300 rounded px-2 py-1 text-center">
+                            <div class="flex items-center gap-2 mb-4">
+                                <label class="text-sm font-medium text-gray-700">Quantity:</label>
+
+                                <div class="flex items-center gap-1">
+                                    <button type="button"
+                                        class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                                        wire:click="decreaseQuantity">−</button>
+
+                                    <span class="w-8 text-center">{{ $quantity }}</span>
+
+                                    <button type="button"
+                                        class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                                        wire:click="increaseQuantity">+</button>
+                                </div>
+                            </div>
+
+
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                Add to Cart
+                            </button>
                         </div>
-
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            Add to Cart
-                        </button>
                     </div>
                 </div>
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
+
 </div>
