@@ -83,6 +83,16 @@ class CartView extends Component
     // }
     public function confirmCheckout($paymentMethod)
     {
+        $lastOrderNumber = Order::orderBy('created_at', 'desc')
+            ->limit(1)
+            ->pluck('order_number')
+            ->first();
+
+        $lastNumber = is_numeric($lastOrderNumber) ? (int)$lastOrderNumber : 0;
+
+        $newNumber = ($lastNumber + 1) % 100;
+
+        $orderNumber = str_pad($newNumber, 2, '0', STR_PAD_LEFT);
         $this->selectedPaymentMethod = $paymentMethod;
 
         $subtotal = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
@@ -93,7 +103,7 @@ class CartView extends Component
             'status' => 'pending',
             'payment_method' => $paymentMethod,
             'payment_status' => $paymentMethod === 'cash' ? 'unpaid' : 'paid',
-            'order_number' => str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT),
+            'order_number' => $orderNumber,
         ]);
 
         foreach ($this->cart as $item) {

@@ -1,47 +1,73 @@
-<div class="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md border border-gray-200">
-    <h1 class="text-3xl font-extrabold mb-6 text-gray-900">
-        Order <span class="text-indigo-600">#{{ $order->order_number }}</span>
-    </h1>
+<div class="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-8 space-y-6">
+    <!-- Header -->
+    <header class="text-center">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Order Details</h1>
+        <p class="text-indigo-600 text-lg font-semibold">
+            Order ID: <span class="font-mono bg-indigo-100 px-2 py-1 rounded">{{ $order->order_number }}</span>
+        </p>
+    </header>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-700">
-        <div>
-            <p class="mb-2"><span class="font-semibold">Status:</span>
-                <span
-                    class="inline-block px-3 py-1 rounded-full text-sm font-medium
-                    {{ $order->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+    <!-- Receipt -->
+    <div class="max-w-md w-full p-6 bg-white rounded-lg shadow-md border border-gray-300 font-mono text-gray-900">
+        <div class="mb-6 text-sm">
+            <div class="flex justify-between mb-1">
+                <span>Status:</span>
+                <span class="{{ $order->status === 'pending' ? 'text-yellow-800' : 'text-green-800' }}">
                     {{ ucfirst($order->status) }}
                 </span>
-            </p>
-            <p class="mb-2"><span class="font-semibold">Payment Method:</span> {{ ucfirst($order->payment_method) }}</p>
-            <p class="mb-2"><span class="font-semibold">Payment Status:</span>
-                <span class="{{ $order->payment_status === 'unpaid' ? 'text-red-600' : 'text-green-600' }}">
+            </div>
+            <div class="flex justify-between mb-1">
+                <span>Payment Method:</span>
+                <span>{{ ucfirst($order->payment_method) }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Payment Status:</span>
+                <span class="{{ $order->payment_status === 'unpaid' ? 'text-red-700' : 'text-green-700' }}">
                     {{ ucfirst($order->payment_status) }}
                 </span>
-            </p>
+            </div>
         </div>
 
-        <div class="text-right sm:text-left">
-            <p class="text-xl font-bold text-gray-900">
-                Total Price: <span class="text-indigo-600">₱{{ number_format($order->total_price, 2) }}</span>
-            </p>
+        <hr class="border-gray-300 mb-4">
+
+        <ul class="mb-4">
+            @foreach ($order->items as $item)
+                <li class="flex justify-between py-1">
+                    <div class="truncate max-w-xs">
+                        <span class="font-semibold">{{ $item->product->name }}</span>
+                        <span class="text-xs text-gray-600"> x{{ $item->quantity }}</span>
+                    </div>
+                    <div class="font-semibold whitespace-nowrap">
+                        ₱{{ number_format($item->price * $item->quantity, 2) }}
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+
+        <hr class="border-gray-300 mb-4">
+
+        <div class="flex justify-between text-lg font-bold">
+            <span>Total:</span>
+            <span class="text-indigo-600">₱{{ number_format($order->total_price, 2) }}</span>
         </div>
     </div>
 
-    <h2 class="mt-10 mb-4 text-xl font-semibold text-gray-800 border-b border-gray-200 pb-2">
-        Items in Your Order
-    </h2>
+    <!-- Footer -->
+    <footer class="text-center text-gray-600 text-sm italic">
+        Please pay your order at the counter.
+    </footer>
 
-    <ul class="divide-y divide-gray-200">
-        @foreach ($order->items as $item)
-            <li class="py-4 flex justify-between items-center hover:bg-gray-50 rounded px-2 transition duration-150">
-                <div>
-                    <p class="font-medium text-gray-900">{{ $item->product->name }}</p>
-                    <p class="text-sm text-gray-500">Quantity: {{ $item->quantity }}</p>
-                </div>
-                <div class="text-indigo-600 font-semibold text-lg">
-                    ₱{{ number_format($item->price * $item->quantity, 2) }}
-                </div>
-            </li>
-        @endforeach
-    </ul>
+    <!-- Back Button -->
+    <button onclick="window.location.href='{{ url('/') }}'"
+        class="mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors inline-flex items-center">
+        <!-- Refresh icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.362 2a9 9 0 11-3.96-7.96" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 20v-5h-.581" />
+        </svg>
+        New Order
+    </button>
+
+
 </div>
