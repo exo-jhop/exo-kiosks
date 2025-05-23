@@ -92,6 +92,10 @@
                 {{ session('message') }}
             </div>
         @endif
+        <a href="{{ route('cart') }}"
+            class="fixed bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow-lg">
+            View Cart
+        </a>
 
         <div @class([
             'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300',
@@ -140,5 +144,4 @@
             @endif
         </div>
     </div>
-
 </div>

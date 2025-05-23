@@ -13,6 +13,7 @@ class KioskView extends Component
     public $categories = [];
     public $selectedCategoryId = null;
     public Collection $products;
+
     public $selectedCategoryName = 'All Products';
     public $selectedCategoryImagePath;
 
@@ -20,10 +21,13 @@ class KioskView extends Component
     public $selectedProduct;
     public $quantity = 1;
 
+    public $cart = [];
+
     public function mount()
     {
         $this->categories = Category::all();
         $this->loadProducts();
+        $this->cart = session()->get('cart', []);
     }
 
     public function openProductModal($productId)
@@ -113,6 +117,13 @@ class KioskView extends Component
         $this->selectedProduct = null;
 
         session()->flash('message', 'Product added to cart!');
+    }
+    public function removeFromCart($productId)
+    {
+        $cart = session()->get('cart', []);
+        unset($cart[$productId]);
+        session()->put('cart', $cart);
+        $this->cart = $cart;
     }
 
     public function render()

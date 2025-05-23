@@ -1,11 +1,9 @@
 <?php
 
 use App\Http\Livewire\ProductView;
+use App\Livewire\CartView;
+use App\Livewire\KioskView;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-Route::get('/kiosks', function () {
-    return view('livewire.kiosk-view');
-});
+Route::get('/', KioskView::class)->name('home');
+Route::get('/cart', CartView::class)->name('cart');
