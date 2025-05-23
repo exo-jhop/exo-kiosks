@@ -1,43 +1,54 @@
 <div>
     <div class="flex h-screen">
-        <div class="w-1/4 bg-white shadow-lg overflow-y-auto h-full thin-scrollbar">
+        <div class="w-1/4 bg-white shadow-lg h-screen flex flex-col justify-between">
 
             <div class="p-4 border-b border-gray-200">
                 <h2 class="text-2xl font-bold text-gray-800">Categories</h2>
             </div>
-            <ul class="divide-y divide-gray-200">
-                <li>
-                    <button wire:click="selectCategory(null)"
-                        class="w-full px-6 py-4 text-left transition duration-150 font-medium
-                    {{ $selectedCategoryId === null ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                </svg>
-                            </div>
-                            <span class="text-lg">All Products</span>
-                        </div>
-                    </button>
-                </li>
-                @foreach ($categories as $category)
+            <div class="overflow-y-auto thin-scrollbar flex-grow">
+                <ul class="divide-y divide-gray-200">
                     <li>
-                        <button wire:click="selectCategory({{ $category->id }})"
+                        <button wire:click="selectCategory(null)"
                             class="w-full px-6 py-4 text-left transition duration-150 font-medium
-                        {{ $selectedCategoryId === $category->id
-                            ? 'bg-blue-50 text-blue-600'
-                            : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                    {{ $selectedCategoryId === null ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
                             <div class="flex items-center space-x-4">
-                                <img src="{{ asset('storage/' . $category->image_path) }}" alt="{{ $category->name }}"
-                                    class="w-10 h-10 object-cover rounded-full" />
-                                <span class="text-lg">{{ $category->name }}</span>
+                                <div class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                    </svg>
+                                </div>
+                                <span class="text-lg">All Products</span>
                             </div>
                         </button>
                     </li>
-                @endforeach
-            </ul>
+                    @foreach ($categories as $category)
+                        <li>
+                            <button wire:click="selectCategory({{ $category->id }})"
+                                class="w-full px-6 py-4 text-left transition duration-150 font-medium
+                        {{ $selectedCategoryId === $category->id
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                                <div class="flex items-center space-x-4">
+                                    <img src="{{ Str::startsWith($category->image_path, 'http') ? $category->image_path : asset('storage/' . $category->image_path) }}"
+                                        alt="{{ $category->name }}" class="w-10 h-10 object-cover rounded-full" />
+
+                                    <span class="text-lg">{{ $category->name }}</span>
+                                </div>
+                            </button>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <a href="{{ route('cart') }}"
+                    class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
+                    🛒 View Cart
+                </a>
+            </div>
+
+
         </div>
 
         <div class="w-3/4 p-6 overflow-y-auto h-full">
@@ -92,10 +103,6 @@
                 {{ session('message') }}
             </div>
         @endif
-        <a href="{{ route('cart') }}"
-            class="fixed bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow-lg">
-            View Cart
-        </a>
 
         <div @class([
             'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300',
