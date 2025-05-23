@@ -87,6 +87,12 @@
                 @endforelse
             </div>
         </div>
+        @if (session()->has('message'))
+            <div class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow">
+                {{ session('message') }}
+            </div>
+        @endif
+
         <div @class([
             'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300',
             'hidden' => !$showProductModal || !$selectedProduct,
@@ -123,10 +129,11 @@
                                 </div>
                             </div>
 
-
-                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            <button wire:click="addToCart"
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                                 Add to Cart
                             </button>
+
                         </div>
                     </div>
                 </div>

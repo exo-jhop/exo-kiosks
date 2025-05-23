@@ -84,6 +84,36 @@ class KioskView extends Component
             $this->quantity--;
         }
     }
+    public function addToCart()
+    {
+        if (!$this->selectedProduct || $this->quantity < 1) {
+            return;
+        }
+
+        $cart = session()->get('cart', []);
+
+        $productId = $this->selectedProduct->id;
+
+        if (isset($cart[$productId])) {
+            $cart[$productId]['quantity'] += $this->quantity;
+        } else {
+            $cart[$productId] = [
+                'id' => $this->selectedProduct->id,
+                'name' => $this->selectedProduct->name,
+                'price' => $this->selectedProduct->price,
+                'image_path' => $this->selectedProduct->image_path,
+                'quantity' => $this->quantity,
+            ];
+        }
+
+        session()->put('cart', $cart);
+
+        $this->showProductModal = false;
+        $this->quantity = 1;
+        $this->selectedProduct = null;
+
+        session()->flash('message', 'Product added to cart!');
+    }
 
     public function render()
     {
