@@ -36,7 +36,8 @@ class SliderResource extends Resource
                     ->directory('sliders')
                     ->preserveFilenames()
                     ->enableOpen()
-                    ->enableDownload(),
+                    ->enableDownload()
+                    ->helperText('Upload an image with exact size: 1024 × 256 pixels'),
                 Forms\Components\Toggle::make('is_active')
                     ->label('Is Active')
                     ->default(true),
