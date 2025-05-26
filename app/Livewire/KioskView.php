@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Slider;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -22,12 +23,14 @@ class KioskView extends Component
     public $quantity = 1;
 
     public $cart = [];
+    public $sliders = [];
 
     public function mount()
     {
         $this->categories = Category::all();
         $this->loadProducts();
         $this->cart = session()->get('cart', []);
+        $this->sliders = Slider::where('is_active', true)->get();
     }
 
     public function openProductModal($productId)
