@@ -18,6 +18,10 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Grid;
+use Filament\Support\HtmlString;
+use Illuminate\Support\HtmlString as SupportHtmlString;
 
 class OrderResource extends Resource
 {
@@ -31,39 +35,113 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
-                Section::make('Order Details')
-                    ->columns(2)
-                    ->description(fn($record) => $record?->order_number ? "Order #{$record->order_number}" : null)
+                Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('order_number')
-                            ->required()
-                            ->disabled(true)
-                            ->unique(Order::class, 'order_number', ignoreRecord: true),
-                        Forms\Components\TextInput::make('total_price')
-                            ->required()
-                            ->numeric(),
-                        Select::make('status')
-                            ->options([
-                                'pending' => 'Pending',
-                                'processing' => 'Processing',
-                                'on_hold' => 'On Hold',
-                                'completed' => 'Completed',
-                                'canceled' => 'Canceled',
+                        Section::make(fn($record) => $record?->order_number ? "Order Number - #{$record->order_number}" : 'Order Details')
+                            ->description('Manage the details of this order')
+                            ->icon('heroicon-o-banknotes')
+                            ->iconColor('success')
+                            ->collapsible()
+                            ->schema([
+                                Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('total_price')
+                                            ->label('Total Amount')
+                                            ->required()
+                                            ->numeric()
+                                            ->prefix('₱')
+                                            ->prefixIcon('heroicon-m-currency-dollar')
+                                            ->extraAttributes([
+                                                'class' => 'text-lg font-semibold'
+                                            ])
+                                            ->step(0.01)
+                                            ->minValue(0)
+                                            ->placeholder('0.00'),
+                                        Select::make('payment_method')
+                                            ->label('Payment Method')
+                                            ->options([
+                                                'cash' => 'Cash Payment',
+                                                'card' => 'Credit/Debit Card',
+                                                'gcash' => 'GCash',
+                                                'paymaya' => 'PayMaya',
+                                                'bank_transfer' => 'Bank Transfer',
+                                            ])
+                                            ->default('cash')
+                                            ->required()
+                                            ->prefixIcon('heroicon-m-credit-card')
+                                            ->native(false)
+                                            ->searchable(),
+                                        Select::make('status')
+                                            ->label('Order Status')
+                                            ->options([
+                                                'pending' => 'Pending',
+                                                'processing' => 'Processing',
+                                                'on_hold' => 'On Hold',
+                                                'completed' => 'Completed',
+                                                'canceled' => 'Canceled',
+                                            ])
+                                            ->prefixIcon('heroicon-m-clock')
+                                            ->native(false)
+                                            ->searchable()
+                                            ->suffixAction(
+                                                Forms\Components\Actions\Action::make('status_info')
+                                                    ->icon('heroicon-m-information-circle')
+                                                    ->color('gray')
+                                                    ->tooltip('View status descriptions')
+                                                    ->modalSubmitAction(false)
+                                                    ->modalCancelActionLabel('Close')
+                                            ),
+
+                                        Select::make('payment_status')
+                                            ->label('Payment Status')
+                                            ->options([
+                                                'paid' => 'Paid',
+                                                'unpaid' => 'Unpaid',
+                                                'partial' => 'Partially Paid',
+                                                'refunded' => 'Refunded',
+                                            ])
+                                            ->default('unpaid')
+                                            ->required()
+                                            ->prefixIcon('heroicon-m-banknotes')
+                                            ->native(false),
+                                        Forms\Components\Actions::make([
+                                            Forms\Components\Actions\Action::make('mark_paid')
+                                                ->label('Mark as Paid')
+                                                ->icon('heroicon-m-check-circle')
+                                                ->color('success')
+                                                ->action(function (array $data, $record) {
+                                                    $record->update(['payment_status' => 'paid']);
+                                                })
+                                                ->requiresConfirmation()
+                                                ->visible(fn($record) => $record?->payment_status !== 'paid'),
+
+                                            Forms\Components\Actions\Action::make('complete_order')
+                                                ->label('Complete Order')
+                                                ->icon('heroicon-m-check-badge')
+                                                ->color('success')
+                                                ->action(function (array $data, $record) {
+                                                    $record->update([
+                                                        'status' => 'completed',
+                                                        'payment_status' => 'paid'
+                                                    ]);
+                                                })
+                                                ->requiresConfirmation()
+                                                ->visible(fn($record) => $record?->status !== 'completed'),
+
+                                            Forms\Components\Actions\Action::make('cancel_order')
+                                                ->label('Cancel Order')
+                                                ->icon('heroicon-m-x-circle')
+                                                ->color('danger')
+                                                ->action(function (array $data, $record) {
+                                                    $record->update(['status' => 'canceled']);
+                                                })
+                                                ->requiresConfirmation()
+                                                ->visible(fn($record) => $record?->status !== 'canceled'),
+                                        ])
+                                    ])
                             ]),
-                        Select::make('payment_method')
-                            ->options([
-                                'cash' => 'Cash',
-                            ])
-                            ->default('cash')
-                            ->required(),
-                        Select::make('payment_status')
-                            ->options([
-                                'paid' => 'Paid',
-                                'unpaid' => 'Unpaid',
-                            ])
-                            ->default('unpaid')
-                            ->required(),
-                    ]),
+                    ])
+                    ->columnSpanFull()
             ]);
     }
 
@@ -73,32 +151,33 @@ class OrderResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->columns([
                 BadgeColumn::make('order_number')
+                    ->label('Order No.')
+                    ->sortable()
+                    ->searchable()
+                    ->alignCenter()
+                    ->color('info'),
+
+                TextColumn::make('total_price')
+                    ->label('Total')
+                    ->money('PHP')
                     ->sortable()
                     ->alignCenter()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('total_price')
+                    ->color('success')
+                    ->badge(),
+
+                BadgeColumn::make('payment_method')
+                    ->label('Method')
                     ->sortable()
                     ->alignCenter()
-                    ->money('PHP'),
-                TextColumn::make('payment_status')
-                    ->sortable()
-                    ->alignCenter(),
-
-                TextColumn::make('status')
-                    ->sortable()
-                    ->alignCenter(),
-
-                Tables\Columns\TextColumn::make('payment_method')
-                    ->sortable()
-                    ->alignCenter(),
+                    ->color('gray'),
 
                 TextColumn::make('created_at')
                     ->getStateUsing(function ($record) {
                         $date = optional($record->created_at)->format('g:i A');
                         $diff = optional($record->created_at)->diffForHumans();
                         return "{$date} ({$diff})";
-                    })
-                    ->badge(),
+                    })->badge(),
+
             ])->filters([])->headerActions([
                 // Tables\Actions\CreateAction::make(),
             ])->actions([
@@ -117,7 +196,6 @@ class OrderResource extends Resource
                 Tables\Actions\Action::make('Process')
                     ->icon('heroicon-o-cog')
                     ->action(function (Order $record) {
-                        // Logic to process the order
                         $record->status = 'processing';
                         $record->save();
                     })

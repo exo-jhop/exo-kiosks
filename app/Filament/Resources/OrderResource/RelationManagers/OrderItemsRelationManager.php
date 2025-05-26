@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\OrderResource\RelationManagers;
 
+use App\Filament\Resources\ProductResource\Pages\EditProduct;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -21,9 +23,21 @@ class OrderItemsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('orderItem')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Select::make('product_id')
+                    ->relationship('product', 'name')
+                    ->required(),
+
+                Forms\Components\TextInput::make('quantity')
+                    ->numeric()
+                    ->required(),
+
+                Forms\Components\TextInput::make('price')
+                    ->numeric()
+                    ->required(),
+
+                Forms\Components\TextInput::make('subtotal')
+                    ->numeric()
+                    ->required(),
             ]);
     }
 
@@ -33,26 +47,37 @@ class OrderItemsRelationManager extends RelationManager
             ->recordTitleAttribute('orderItem')
             ->columns([
                 ImageColumn::make('product.image_path')
-                    ->label('Product ID')
-                    ->searchable()
+                    ->label('Product Image')
                     ->alignCenter()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn($record) => EditProduct::getUrl(['record' => $record->product_id]))
+                    ->square()
+                    ->extraImgAttributes(['class' => 'rounded-md shadow-sm']),
 
-                Tables\Columns\TextColumn::make('product.name')
+                TextColumn::make('product.name')
                     ->label('Product Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn($record) => EditProduct::getUrl(['record' => $record->product_id]))
+                    ->toggleable()
+                    ->wrap(),
 
-                Tables\Columns\TextColumn::make('quantity')
+                TextColumn::make('quantity')
                     ->label('Quantity')
+                    ->badge()
+                    ->colors([
+                        'primary',
+                        'warning' => fn($state) => $state < 5,
+                    ])
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('price')
+                TextColumn::make('price')
                     ->label('Price')
+                    ->badge()
                     ->money('PHP')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('subtotal')
+                TextColumn::make('subtotal')
                     ->label('Subtotal')
                     ->money('PHP')
                     ->sortable(),

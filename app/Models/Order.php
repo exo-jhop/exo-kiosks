@@ -21,10 +21,10 @@ class Order extends Model
         'status' => 'string',
     ];
 
-    public function items()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
+    // public function items()
+    // {
+    //     return $this->hasMany(OrderItem::class);
+    // }
     public function user()
     {
         return $this->belongsTo(User::class);
