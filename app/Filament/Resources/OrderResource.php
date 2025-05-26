@@ -70,6 +70,7 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 BadgeColumn::make('order_number')
                     ->sortable()
@@ -79,27 +80,18 @@ class OrderResource extends Resource
                     ->sortable()
                     ->alignCenter()
                     ->money('PHP'),
-                SelectColumn::make('payment_status')
-                    ->options([
-                        'pending' => 'paid',
-                        'unpaid' => 'unpaid',
-                    ])
+                TextColumn::make('payment_status')
                     ->sortable()
                     ->alignCenter(),
 
-                SelectColumn::make('status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'processing' => 'Processing',
-                        'on_hold' => 'On Hold',
-                        'completed' => 'Completed',
-                        'canceled' => 'Canceled',
-                    ])
+                TextColumn::make('status')
                     ->sortable()
                     ->alignCenter(),
+
                 Tables\Columns\TextColumn::make('payment_method')
                     ->sortable()
                     ->alignCenter(),
+
                 TextColumn::make('created_at')
                     ->getStateUsing(function ($record) {
                         $date = optional($record->created_at)->format('g:i A');
@@ -107,9 +99,7 @@ class OrderResource extends Resource
                         return "{$date} ({$diff})";
                     })
                     ->badge(),
-            ])->filters([
-                //
-            ])->headerActions([
+            ])->filters([])->headerActions([
                 // Tables\Actions\CreateAction::make(),
             ])->actions([
                 Tables\Actions\ViewAction::make(),
