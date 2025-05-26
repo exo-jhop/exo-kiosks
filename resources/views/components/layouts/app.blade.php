@@ -25,6 +25,33 @@
             display: none !important;
         }
     </style>
+    <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+    <script>
+        Pusher.logToConsole = true;
+
+        var pusher = new Pusher('2c345791d572acf0e408', {
+            cluster: 'ap1'
+        });
+
+        var channel = pusher.subscribe('my-channel');
+        channel.bind('my-event', function(data) {
+            alert(JSON.stringify(data));
+        });
+    </script>
+    @livewire('notifications')
+    <script>
+        window.addEventListener('show-filament-notification', event => {
+            if (window.Filament?.notify) {
+                window.Filament.notify('success', {
+                    title: event.detail.title,
+                    message: event.detail.message,
+                    icon: 'heroicon-o-shopping-cart',
+                    timeout: 5000,
+                });
+            }
+        });
+    </script>
+
 </head>
 
 <body>

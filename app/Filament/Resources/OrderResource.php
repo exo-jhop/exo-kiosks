@@ -4,17 +4,19 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
+use App\Filament\Resources\OrderResource\RelationManagers\OrderItemsRelationManager;
+use App\Filament\Widgets\OrderAlert;
 use App\Models\Order;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class OrderResource extends Resource
 {
@@ -28,10 +30,13 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make()
+                Section::make('Order Details')
+                    ->columns(2)
+                    ->description(fn($record) => $record?->order_number ? "Order #{$record->order_number}" : null)
                     ->schema([
                         Forms\Components\TextInput::make('order_number')
                             ->required()
+                            ->disabled(true)
                             ->unique(Order::class, 'order_number', ignoreRecord: true),
                         Forms\Components\TextInput::make('total_price')
                             ->required()
@@ -43,9 +48,22 @@ class OrderResource extends Resource
                                 'on_hold' => 'On Hold',
                                 'completed' => 'Completed',
                                 'canceled' => 'Canceled',
+                            ]),
+                        Select::make('payment_method')
+                            ->options([
+                                'cash' => 'Cash',
                             ])
+                            ->default('cash')
                             ->required(),
-                    ])->columns(2),
+                        Select::make('payment_status')
+                            ->options([
+                                'pending' => 'Pending',
+                                'paid' => 'Paid',
+                                'unpaid' => 'Unpaid',
+                            ])
+                            ->default('unpaid')
+                            ->required(),
+                    ]),
             ]);
     }
 
@@ -61,6 +79,14 @@ class OrderResource extends Resource
                     ->sortable()
                     ->alignCenter()
                     ->money('PHP'),
+                SelectColumn::make('payment_status')
+                    ->options([
+                        'pending' => 'paid',
+                        'unpaid' => 'unpaid',
+                    ])
+                    ->sortable()
+                    ->alignCenter(),
+
                 SelectColumn::make('status')
                     ->options([
                         'pending' => 'Pending',
@@ -71,19 +97,23 @@ class OrderResource extends Resource
                     ])
                     ->sortable()
                     ->alignCenter(),
+                Tables\Columns\TextColumn::make('payment_method')
+                    ->sortable()
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Placed')
                     ->sortable()
                     ->alignCenter()
-                    ->date(),
-                Tables\Columns\TextColumn::make('payment_status')
-                    ->sortable()
-                    ->alignCenter()
+                    ->dateTime('M d, Y h:i:s A'),
+
+
             ])->filters([
                 //
             ])->headerActions([
-                Tables\Actions\CreateAction::make(),
+                // Tables\Actions\CreateAction::make(),
             ])->actions([
                 Tables\Actions\ViewAction::make(),
+
             ])->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -94,6 +124,15 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('Process')
+                    ->icon('heroicon-o-cog')
+                    ->action(function (Order $record) {
+                        // Logic to process the order
+                        $record->status = 'processing';
+                        $record->save();
+                    })
+                    ->requiresConfirmation()
+                    ->color('primary'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -102,10 +141,12 @@ class OrderResource extends Resource
             ]);
     }
 
+
+
     public static function getRelations(): array
     {
         return [
-            //
+            OrderItemsRelationManager::class,
         ];
     }
 
@@ -113,6 +154,7 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
+            'view' => Pages\ViewOrder::route('/view/{record}'),
             'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];

@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Broadcasting\BroadcastServiceProvider;
+
 return [
 
     /*

@@ -6,6 +6,7 @@ use App\Filament\Resources\OrderItemResource\Pages;
 use App\Filament\Resources\OrderItemResource\RelationManagers;
 use App\Models\OrderItem;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -27,7 +28,24 @@ class OrderItemResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Section::make('Order Item Details')
+                    ->columns(2)
+                    ->description(fn($record) => $record?->order_id ? "Order ID: {$record->order_id}" : null)
+                    ->schema([
+                        // Forms\Components\TextInput::make('order_id')
+                        //     ->required()
+                        //     ->disabled()
+                        //     ->maxLength(255),
+                        Forms\Components\TextInput::make('quantity')
+                            ->required()
+                            ->prefixIcon('heroicon-o-hashtag')
+                            ->numeric(),
+                        Forms\Components\TextInput::make('price')
+                            ->required()
+                            ->numeric()
+                            ->default(0.00),
+                    ])->columns(2),
+
             ]);
     }
 
@@ -35,6 +53,18 @@ class OrderItemResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('product_name')
+                    ->label('Product')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('quantity')
+                    ->label('Quantity')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('price')
+                    ->label('Price')
+                    ->money('PHP')
+                    ->sortable(),
+            ])->filters([
                 //
             ])
             ->filters([

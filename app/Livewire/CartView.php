@@ -2,7 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Events\OrderPlaced;
 use App\Models\Order;
+use App\Models\User;
+use App\Notifications\AdminOrderPlaced;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class CartView extends Component
@@ -44,43 +49,6 @@ class CartView extends Component
         }
     }
 
-    public function checkout()
-    {
-        if (empty($this->cart)) {
-            session()->flash('error', 'Cart is empty!');
-            return;
-        }
-        $this->showPaymentModal = true;
-    }
-
-    //     $subtotal = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
-
-    //     $order = Order::create([
-    //         'total_price' => $subtotal,
-    //         'subtotal' => $subtotal,
-    //         'status' => 'pending',
-    //         'payment_method' => 'cash',
-    //         'payment_status' => 'unpaid',
-    //         'order_number' => str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT),
-    //     ]);
-
-    //     foreach ($this->cart as $item) {
-    //         $itemSubtotal = $item['price'] * $item['quantity'];
-
-    //         $order->items()->create([
-    //             'product_id' => $item['id'],
-    //             'quantity' => $item['quantity'],
-    //             'price' => $item['price'],
-    //             'subtotal' => $itemSubtotal,
-    //         ]);
-    //     }
-
-    //     session()->forget('cart');
-    //     $this->cart = [];
-
-    //     session()->flash('success', 'Order placed successfully!');
-    //     return redirect()->route('orders.show', $order->id);
-    // }
     public function confirmCheckout($paymentMethod)
     {
         $lastOrderNumber = Order::orderBy('created_at', 'desc')
@@ -89,10 +57,9 @@ class CartView extends Component
             ->first();
 
         $lastNumber = is_numeric($lastOrderNumber) ? (int)$lastOrderNumber : 0;
-
         $newNumber = ($lastNumber + 1) % 100;
-
         $orderNumber = str_pad($newNumber, 2, '0', STR_PAD_LEFT);
+
         $this->selectedPaymentMethod = $paymentMethod;
 
         $subtotal = collect($this->cart)->sum(fn($item) => $item['price'] * $item['quantity']);
@@ -107,15 +74,17 @@ class CartView extends Component
         ]);
 
         foreach ($this->cart as $item) {
-            $itemSubtotal = $item['price'] * $item['quantity'];
-
             $order->items()->create([
                 'product_id' => $item['id'],
                 'quantity' => $item['quantity'],
                 'price' => $item['price'],
-                'subtotal' => $itemSubtotal,
+                'subtotal' => $item['price'] * $item['quantity'],
             ]);
         }
+
+        Log::info('OrderPlaced event fired', ['order_id' => $order->id]);
+
+        broadcast(new OrderPlaced($order))->toOthers();
 
         session()->forget('cart');
         $this->cart = [];
@@ -123,6 +92,15 @@ class CartView extends Component
 
         session()->flash('success', 'Order placed successfully!');
         return redirect()->route('orders.show', $order->id);
+    }
+
+    public function checkout()
+    {
+        if (empty($this->cart)) {
+            session()->flash('error', 'Cart is empty!');
+            return;
+        }
+        $this->showPaymentModal = true;
     }
 
     public function render()
