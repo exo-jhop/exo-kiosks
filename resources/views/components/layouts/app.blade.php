@@ -39,7 +39,7 @@
         });
     </script>
     @livewire('notifications')
-    <script>
+    {{-- <script>
         window.addEventListener('show-filament-notification', event => {
             if (window.Filament?.notify) {
                 window.Filament.notify('success', {
@@ -50,8 +50,7 @@
                 });
             }
         });
-    </script>
-
+    </script> --}}
 </head>
 
 <body>

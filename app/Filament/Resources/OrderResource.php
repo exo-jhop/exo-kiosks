@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class OrderResource extends Resource
@@ -100,13 +101,13 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('payment_method')
                     ->sortable()
                     ->alignCenter(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Placed')
-                    ->sortable()
-                    ->alignCenter()
-                    ->dateTime('M d, Y h:i:s A'),
-
-
+                TextColumn::make('created_at')
+                    ->getStateUsing(function ($record) {
+                        $date = optional($record->created_at)->format('g:i A');
+                        $diff = optional($record->created_at)->diffForHumans();
+                        return "{$date} ({$diff})";
+                    })
+                    ->badge(),
             ])->filters([
                 //
             ])->headerActions([
@@ -123,7 +124,7 @@ class OrderResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('Process')
                     ->icon('heroicon-o-cog')
                     ->action(function (Order $record) {
@@ -133,6 +134,8 @@ class OrderResource extends Resource
                     })
                     ->requiresConfirmation()
                     ->color('primary'),
+                Tables\Actions\EditAction::make(),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

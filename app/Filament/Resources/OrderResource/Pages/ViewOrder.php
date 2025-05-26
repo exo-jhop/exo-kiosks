@@ -40,7 +40,6 @@ class ViewOrder extends ViewRecord
                                                 return "{$date} ({$diff})";
                                             })
                                             ->badge(),
-                                        TextEntry::make('payment_status')->badge(),
                                     ])->columns(3),
                             ]),
                     ])
