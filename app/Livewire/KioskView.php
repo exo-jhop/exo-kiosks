@@ -21,6 +21,7 @@ class KioskView extends Component
     public $showProductModal = false;
     public $selectedProduct;
     public $quantity = 1;
+    public $quantities = [];
 
     public $cart = [];
     public $sliders = [];
@@ -79,48 +80,58 @@ class KioskView extends Component
             $this->selectedCategoryImagePath = null;
             $this->products = Product::all();
         }
-    }
-    public function increaseQuantity()
-    {
-        $this->quantity++;
+        foreach ($this->products as $product) {
+            if (!isset($this->quantities[$product->id])) {
+                $this->quantities[$product->id] = 1;
+            }
+        }
     }
 
-    public function decreaseQuantity()
+    public function increaseQuantity($productId)
     {
-        if ($this->quantity > 1) {
-            $this->quantity--;
+        if (!isset($this->quantities[$productId])) {
+            $this->quantities[$productId] = 1;
+        } else {
+            $this->quantities[$productId]++;
         }
     }
-    public function addToCart()
+
+    public function decreaseQuantity($productId)
     {
-        if (!$this->selectedProduct || $this->quantity < 1) {
-            return;
+        if (isset($this->quantities[$productId]) && $this->quantities[$productId] > 1) {
+            $this->quantities[$productId]--;
         }
+    }
+
+    public function addToCart($productId)
+    {
+        $product = Product::find($productId);
+
+        if (!$product) return;
+
+        $quantityToAdd = $this->quantities[$productId] ?? 1;
 
         $cart = session()->get('cart', []);
 
-        $productId = $this->selectedProduct->id;
-
         if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] += $this->quantity;
+            $cart[$productId]['quantity'] += $quantityToAdd;
         } else {
             $cart[$productId] = [
-                'id' => $this->selectedProduct->id,
-                'name' => $this->selectedProduct->name,
-                'price' => $this->selectedProduct->price,
-                'image_path' => $this->selectedProduct->image_path,
-                'quantity' => $this->quantity,
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'image_path' => $product->image_path,
+                'quantity' => $quantityToAdd,
             ];
         }
 
         session()->put('cart', $cart);
-
-        $this->showProductModal = false;
-        $this->quantity = 1;
-        $this->selectedProduct = null;
+        $this->cart = $cart;
 
         session()->flash('message', 'Product added to cart!');
     }
+
+
     public function removeFromCart($productId)
     {
         $cart = session()->get('cart', []);

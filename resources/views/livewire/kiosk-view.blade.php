@@ -1,9 +1,6 @@
 <div>
-
-
     <div class="flex h-screen">
         <div class="w-1/4 bg-white shadow-lg h-screen flex flex-col justify-between">
-
             <div class="p-4 border-b border-gray-200">
                 <h2 class="text-2xl font-bold text-gray-800">Categories</h2>
             </div>
@@ -52,7 +49,6 @@
 
 
         </div>
-
         <div class="w-3/4 p-6 overflow-y-auto h-full">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
                 @if ($selectedCategoryId && $selectedCategoryImagePath)
@@ -88,10 +84,31 @@
                         <div class="p-4">
                             <h3 class="font-semibold text-lg mb-1">{{ $product->name }}</h3>
                             <p class="text-gray-600 text-sm mb-2">{{ $product->description }}</p>
-                            <div class="flex justify-between items-center mt-3">
-                                <span class="font-bold text-gray-800">₱{{ number_format($product->price, 2) }}</span>
+
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="flex items-center space-x-2">
+                                    <button type="button"
+                                        class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                                        wire:click="decreaseQuantity({{ $product->id }})">−</button>
+
+                                    <span class="w-8 text-center">{{ $quantities[$product->id] ?? 1 }}</span>
+
+                                    <button type="button"
+                                        class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                                        wire:click="increaseQuantity({{ $product->id }})">+</button>
+                                </div>
+                                <span
+                                    class="font-bold text-gray-800 text-right">₱{{ number_format($product->price, 2) }}</span>
+                            </div>
+
+                            <div class="mt-2">
+                                <button wire:click="addToCart({{ $product->id }})"
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                    Add to Cart
+                                </button>
                             </div>
                         </div>
+
                     </div>
                 @empty
                     <div class="col-span-full text-center py-12">

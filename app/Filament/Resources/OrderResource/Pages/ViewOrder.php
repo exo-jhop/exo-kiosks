@@ -24,25 +24,28 @@ class ViewOrder extends ViewRecord
         $orderNumber = $this->record?->order_number;
         return $infolist
             ->schema([
-                Grid::make(2)
-                    ->schema([
-                        Fieldset::make("ORDER NUMBER #{$orderNumber}")
-                            ->schema([
-                                Grid::make(3)
-                                    ->schema([
-                                        TextEntry::make('status')->badge(),
-                                        TextEntry::make('total_price')->badge()->money('PHP'),
-                                        TextEntry::make('payment_status')->badge(),
-                                        TextEntry::make('created_at')
-                                            ->getStateUsing(function ($record) {
-                                                $date = optional($record->created_at)->format('F j, Y g:i A');
-                                                $diff = optional($record->created_at)->diffForHumans();
-                                                return "{$date} ({$diff})";
-                                            })
-                                            ->badge(),
-                                    ])->columns(3),
-                            ]),
-                    ])
+                Section::make('Order Details')->schema([
+                    Grid::make(2)
+                        ->schema([
+                            Fieldset::make("#{$orderNumber}")
+                                ->schema([
+                                    Grid::make(3)
+                                        ->schema([
+                                            TextEntry::make('status')->badge(),
+                                            TextEntry::make('total_price')->badge()->money('PHP'),
+                                            TextEntry::make('payment_status')->badge(),
+                                            TextEntry::make('created_at')
+                                                ->getStateUsing(function ($record) {
+                                                    $date = optional($record->created_at)->format('F j, Y g:i A');
+                                                    $diff = optional($record->created_at)->diffForHumans();
+                                                    return "{$date} ({$diff})";
+                                                })
+                                                ->badge(),
+                                        ])->columns(3),
+                                ]),
+                        ])
+                ]),
+
 
             ]);
     }
