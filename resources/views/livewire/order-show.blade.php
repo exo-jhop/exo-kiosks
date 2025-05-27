@@ -1,5 +1,5 @@
 <div class="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-8 space-y-6">
-    <!-- Header -->
+
     <header class="text-center">
         <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Order Details</h1>
         <p class="text-indigo-600 text-lg font-semibold">
@@ -7,7 +7,6 @@
         </p>
     </header>
 
-    <!-- Receipt -->
     <div class="max-w-md w-full p-6 bg-white rounded-lg shadow-md border border-gray-300 font-mono text-gray-900">
         <div class="mb-6 text-sm">
             <div class="flex justify-between mb-1">
@@ -31,7 +30,7 @@
         <hr class="border-gray-300 mb-4">
 
         <ul class="mb-4">
-            @foreach ($order->items as $item)
+            @foreach ($order->orderItems as $item)
                 <li class="flex justify-between py-1">
                     <div class="truncate max-w-xs">
                         <span class="font-semibold">{{ $item->product->name }}</span>

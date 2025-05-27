@@ -13,7 +13,7 @@ class OrderShow extends Component
     public function mount($orderId)
     {
         $this->orderId = $orderId;
-        $this->order = Order::with('items.product')->findOrFail($orderId);
+        $this->order = Order::with('orderItems.product')->findOrFail($orderId);
     }
 
     public function render()

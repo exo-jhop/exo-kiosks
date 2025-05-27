@@ -172,11 +172,8 @@ class OrderResource extends Resource
                     ->color('gray'),
 
                 TextColumn::make('created_at')
-                    ->getStateUsing(function ($record) {
-                        $date = optional($record->created_at)->format('g:i A');
-                        $diff = optional($record->created_at)->diffForHumans();
-                        return "{$date} ({$diff})";
-                    })->badge(),
+                    ->since()
+                    ->badge(),
 
             ])->filters([])->headerActions([
                 // Tables\Actions\CreateAction::make(),

@@ -27,7 +27,6 @@ class OrderPlaced implements ShouldBroadcastNow
     {
         $this->order = $order;
 
-        // Send to all admin users
         $admins = \App\Models\User::where('is_admin', true)->get();
 
         foreach ($admins as $admin) {
@@ -39,7 +38,6 @@ class OrderPlaced implements ShouldBroadcastNow
                     Action::make('view')
                         ->label('View Order')
                         ->url(route('filament.admin.resources.orders.view', ['record' => $order->id])),
-                    // ->openUrlInNewTab(),
                 ])
                 ->sendToDatabase($admin);
         }

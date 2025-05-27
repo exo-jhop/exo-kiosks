@@ -1,22 +1,5 @@
 <div>
-    @if ($selectedCategoryId === null && !empty($sliders) && $sliders->count())
-        <div class="w-full mb-6">
-            <div class="relative w-full overflow-hidden rounded-none shadow-md h-64">
-                <div class="flex overflow-x-auto space-x-4 p-2 scrollbar-hide"
-                     x-data="{ activeSlide: 0 }"
-                     x-init="setInterval(() => { activeSlide = (activeSlide + 1) % {{ $sliders->count() }} }, 3000)">
-                    @foreach ($sliders as $index => $slider)
-                        <div class="flex-shrink-0 w-full"
-                             x-show="activeSlide === {{ $index }}"
-                             x-transition>
-                            <img src="{{ asset('storage/' . $slider->image_path) }}" alt="{{ $slider->title }}"
-                               class="w-full h-64 object-cover">
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    @endif
+
 
     <div class="flex h-screen">
         <div class="w-1/4 bg-white shadow-lg h-screen flex flex-col justify-between">

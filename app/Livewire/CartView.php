@@ -74,15 +74,13 @@ class CartView extends Component
         ]);
 
         foreach ($this->cart as $item) {
-            $order->items()->create([
+            $order->orderItems()->create([
                 'product_id' => $item['id'],
                 'quantity' => $item['quantity'],
                 'price' => $item['price'],
                 'subtotal' => $item['price'] * $item['quantity'],
             ]);
         }
-
-        Log::info('OrderPlaced event fired', ['order_id' => $order->id]);
 
         broadcast(new OrderPlaced($order))->toOthers();
 
