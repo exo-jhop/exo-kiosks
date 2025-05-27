@@ -3,25 +3,25 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
-use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Filament\Resources\OrderResource\RelationManagers\OrderItemsRelationManager;
-use App\Filament\Widgets\OrderAlert;
 use App\Models\Order;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Grid;
-use Filament\Support\HtmlString;
-use Illuminate\Support\HtmlString as SupportHtmlString;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Get;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
+use Illuminate\Support\HtmlString;
 
 class OrderResource extends Resource
 {
@@ -104,40 +104,6 @@ class OrderResource extends Resource
                                             ->required()
                                             ->prefixIcon('heroicon-m-banknotes')
                                             ->native(false),
-                                        Forms\Components\Actions::make([
-                                            Forms\Components\Actions\Action::make('mark_paid')
-                                                ->label('Mark as Paid')
-                                                ->icon('heroicon-m-check-circle')
-                                                ->color('success')
-                                                ->action(function (array $data, $record) {
-                                                    $record->update(['payment_status' => 'paid']);
-                                                })
-                                                ->requiresConfirmation()
-                                                ->visible(fn($record) => $record?->payment_status !== 'paid'),
-
-                                            Forms\Components\Actions\Action::make('complete_order')
-                                                ->label('Complete Order')
-                                                ->icon('heroicon-m-check-badge')
-                                                ->color('success')
-                                                ->action(function (array $data, $record) {
-                                                    $record->update([
-                                                        'status' => 'completed',
-                                                        'payment_status' => 'paid'
-                                                    ]);
-                                                })
-                                                ->requiresConfirmation()
-                                                ->visible(fn($record) => $record?->status !== 'completed'),
-
-                                            Forms\Components\Actions\Action::make('cancel_order')
-                                                ->label('Cancel Order')
-                                                ->icon('heroicon-m-x-circle')
-                                                ->color('danger')
-                                                ->action(function (array $data, $record) {
-                                                    $record->update(['status' => 'canceled']);
-                                                })
-                                                ->requiresConfirmation()
-                                                ->visible(fn($record) => $record?->status !== 'canceled'),
-                                        ])
                                     ])
                             ]),
                     ])
@@ -165,6 +131,20 @@ class OrderResource extends Resource
                     ->color('success')
                     ->badge(),
 
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->sortable()
+                    ->alignCenter()
+                    ->badge()
+                    ->colors([
+                        'gray' => 'pending',
+                        'info' => 'processing',
+                        'warning' => 'on_hold',
+                        'success' => 'completed',
+                        'danger' => 'canceled',
+                    ]),
+
+
                 BadgeColumn::make('payment_method')
                     ->label('Method')
                     ->sortable()
@@ -190,16 +170,74 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\Action::make('Process')
+                Action::make('Process')
                     ->icon('heroicon-o-cog')
-                    ->action(function (Order $record) {
-                        $record->status = 'processing';
-                        $record->save();
-                    })
-                    ->requiresConfirmation()
-                    ->color('primary'),
-                Tables\Actions\EditAction::make(),
+                    ->modalHeading('Checkout')
+                    ->modalWidth('sm')
+                    ->form([
+                        Placeholder::make('items')
+                            ->label('Items')
+                            ->content(fn(Order $record) => new HtmlString(
+                                view('components.order-items', ['order' => $record])->render()
+                            )),
 
+                        TextInput::make('amount_paid')
+                            ->label('Amount Paid')
+                            ->numeric()
+                            ->required()
+                            ->reactive()
+                            ->visible(fn(Order $record) => $record->status !== 'completed'),
+
+                        Hidden::make('total')
+                            ->default(fn(Order $record) => $record->orderItems->sum(
+                                fn($item) => $item->quantity * $item->price
+                            )),
+
+                        Placeholder::make('change')
+                            ->label('Change')
+                            ->content(function (Get $get) {
+                                $amountPaid = floatval($get('amount_paid') ?? 0);
+                                $total = floatval($get('total') ?? 0);
+                                $change = max(0, $amountPaid - $total);
+
+                                return new HtmlString(
+                                    '<span class="text-primary-600 text-xl font-semibold">₱ ' . number_format($change, 2) . '</span>'
+                                );
+                            })
+                            ->visible(fn(Order $record) => $record->status !== 'completed'),
+                    ])
+                    ->action(function (array $data, Order $record) {
+                        if ($record->status === 'completed') {
+                            return;
+                        }
+
+                        $total = $record->orderItems->sum(fn($item) => $item->quantity * $item->price);
+                        $amountPaid = floatval($data['amount_paid']);
+
+                        if ($amountPaid < $total) {
+                            Notification::make()
+                                ->title('Insufficient amount paid.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        $record->update([
+                            'status' => 'completed',
+                            'payment_status' => 'Paid',
+                        ]);
+
+                        Notification::make()
+                            ->title('Order processed successfully')
+                            ->success()
+                            ->send();
+                    })
+                    ->modalSubmitActionLabel('Close')
+                    ->modalCancelAction(false)
+                    ->color('primary'),
+
+
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
