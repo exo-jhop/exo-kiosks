@@ -6,6 +6,7 @@ use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers\OrderItemsRelationManager;
 use App\Models\Order;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
@@ -17,11 +18,17 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Carbon;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
 
 class OrderResource extends Resource
 {
@@ -75,8 +82,8 @@ class OrderResource extends Resource
                                             ->label('Order Status')
                                             ->options([
                                                 'pending' => 'Pending',
-                                                'processing' => 'Processing',
-                                                'on_hold' => 'On Hold',
+                                                'preparing' => 'Preparing',
+                                                'on hold' => 'On Hold',
                                                 'completed' => 'Completed',
                                                 'canceled' => 'Canceled',
                                             ])
@@ -138,7 +145,7 @@ class OrderResource extends Resource
                     ->badge()
                     ->colors([
                         'gray' => 'pending',
-                        'info' => 'processing',
+                        'info' => 'preparing',
                         'warning' => 'on_hold',
                         'success' => 'completed',
                         'danger' => 'canceled',
@@ -155,9 +162,22 @@ class OrderResource extends Resource
                     ->since()
                     ->badge(),
 
-            ])->filters([])->headerActions([
-                // Tables\Actions\CreateAction::make(),
-            ])->actions([
+            ])->filters([
+                Filter::make('created_at')
+                    ->form([
+                        Forms\Components\DatePicker::make('created_at')
+                            ->label('Order Date'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when($data['created_at'], fn($q) => $q->whereDate('created_at', $data['created_at']));
+                    }),
+                SelectFilter::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'completed' => 'Completed',
+                    ]),
+
+            ])->headerActions([])->actions([
                 Tables\Actions\ViewAction::make(),
 
             ])->bulkActions([
@@ -165,15 +185,21 @@ class OrderResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->filters([
-                //
-            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Action::make('Process')
                     ->icon('heroicon-o-cog')
                     ->modalHeading('Checkout')
                     ->modalWidth('sm')
+                    ->visible(function (Order $record, $livewire) {
+                        if ($livewire->activeTab === 'all') {
+                            return $record->status !== 'completed';
+                        }
+
+                        return $record->status === 'pending';
+                    })
+
+
                     ->form([
                         Placeholder::make('items')
                             ->label('Items')
@@ -207,7 +233,7 @@ class OrderResource extends Resource
                             ->visible(fn(Order $record) => $record->status !== 'completed'),
                     ])
                     ->action(function (array $data, Order $record) {
-                        if ($record->status === 'completed') {
+                        if ($record->status === 'completed' || $record->status === 'preparing') {
                             return;
                         }
 
@@ -223,7 +249,7 @@ class OrderResource extends Resource
                         }
 
                         $record->update([
-                            'status' => 'completed',
+                            'status' => 'preparing',
                             'payment_status' => 'Paid',
                         ]);
 
@@ -236,9 +262,13 @@ class OrderResource extends Resource
                     ->modalCancelAction(false)
                     ->color('primary'),
 
-
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(
+                        fn(Order $order, $livewire) =>
+                        $livewire->activeTab === 'all' || in_array($order->status, ['pending'])
+                    ),
             ])
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
