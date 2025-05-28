@@ -24,6 +24,7 @@ class KioskView extends Component
     public $quantities = [];
 
     public $cart = [];
+    public $cartCount = 0;
     public $sliders = [];
 
     public function mount()
@@ -31,6 +32,7 @@ class KioskView extends Component
         $this->categories = Category::all();
         $this->loadProducts();
         $this->cart = session()->get('cart', []);
+        $this->updateCartCount();
         $this->sliders = Slider::where('is_active', true)->get();
     }
 
@@ -103,6 +105,12 @@ class KioskView extends Component
         }
     }
 
+    public function updateCartCount()
+    {
+        $cart = session()->get('cart', []);
+        $this->cartCount = count($cart);
+    }
+
     public function addToCart($productId)
     {
         $product = Product::find($productId);
@@ -127,6 +135,7 @@ class KioskView extends Component
 
         session()->put('cart', $cart);
         $this->cart = $cart;
+        $this->updateCartCount();
 
         session()->flash('message', 'Product added to cart!');
     }
@@ -138,6 +147,7 @@ class KioskView extends Component
         unset($cart[$productId]);
         session()->put('cart', $cart);
         $this->cart = $cart;
+        $this->updateCartCount();
     }
 
     public function render()

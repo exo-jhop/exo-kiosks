@@ -42,11 +42,15 @@
             </div>
             <div class="p-4 border-t border-gray-200">
                 <a href="{{ route('cart') }}"
-                    class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
-                    🛒 View Cart
+                    class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow flex items-center justify-center relative gap-2">
+                    <span>🛒 View Cart</span>
+                    @if($cartCount > 0)
+                        <span class="bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                            {{ $cartCount }}
+                        </span>
+                    @endif
                 </a>
             </div>
-
 
         </div>
         <div class="w-3/4 p-6 overflow-y-auto h-full">
