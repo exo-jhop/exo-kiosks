@@ -7,7 +7,8 @@
         <!-- Scrollable cart items -->
         <div class="flex-grow overflow-y-auto space-y-4">
             @foreach ($cart as $item)
-                <div class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
+                <div class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between"
+                    wire:key="cart-item-{{ $item['id'] }}">
                     <!-- Image + Item Info -->
                     <div class="flex items-center space-x-4">
                         <img src="{{ Str::startsWith($item['image_path'], 'http') ? $item['image_path'] : asset('storage/' . $item['image_path']) }}"
