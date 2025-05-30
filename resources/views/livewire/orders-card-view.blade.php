@@ -9,12 +9,52 @@
                         Order #{{ $order->order_number }}
                     </h3>
 
-                    <p class="mb-3 text-lg text-gray-700 dark:text-gray-300">
+                    @php
+                        $statuses = ['pending' => 0, 'preparing' => 1, 'ready' => 2];
+                        $currentStep = $statuses[$order->status] ?? 0;
+                        $steps = ['Pending', 'Preparing', 'Ready'];
+                    @endphp
+
+                    <div class="flex justify-between items-center mt-4 mb-2">
+                        @foreach ($steps as $index => $label)
+                            <div class="flex-1 flex items-center">
+                                <div
+                                    class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold
+                                    {{ $index < $currentStep
+                                        ? 'bg-green-500 text-white'
+                                        : ($index === $currentStep
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-gray-300') }}">
+                                    @if ($index < $currentStep)
+                                        ✓
+                                    @else
+                                        {{ $index + 1 }}
+                                    @endif
+                                </div>
+
+                                @if ($index < count($steps) - 1)
+                                    <div
+                                        class="flex-1 h-1 mx-2
+                                        {{ $index < $currentStep ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600' }}">
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400 px-1">
+                        @foreach ($steps as $label)
+                            <span class="w-1/3 text-center">{{ $label }}</span>
+                        @endforeach
+                    </div>
+
+                    <p class="mt-4 mb-3 text-lg text-gray-700 dark:text-gray-300">
                         <span class="font-semibold">Total Price:</span>
                         <span class="text-indigo-600 dark:text-indigo-400 font-bold">
                             ${{ number_format($order->total_price, 2) }}
                         </span>
                     </p>
+
                     @if ($order->orderItems->count())
                         <div class="mb-4">
                             <p class="font-semibold text-gray-700 dark:text-gray-300 mb-1">Items:</p>
@@ -63,8 +103,8 @@
                     @if ($order->status === 'pending')
                         <button wire:click="markAsPreparing({{ $order->id }})" wire:loading.attr="disabled"
                             class="w-full px-4 py-2 text-center font-semibold rounded-lg border
-                   bg-emerald-600 text-white hover:bg-emerald-700 border-emerald-700
-                   dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:border-emerald-300
+                   bg-yellow-500 text-white hover:bg-yellow-600 border-yellow-600
+                   dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:border-yellow-500
                    transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
                             <span wire:loading.remove>Mark as Preparing</span>
                             <span wire:loading>Updating...</span>
@@ -73,7 +113,7 @@
                         <button wire:click="markAsReady({{ $order->id }})" wire:loading.attr="disabled"
                             class="w-full px-4 py-2 text-center font-semibold rounded-lg border
                    bg-blue-600 text-white hover:bg-blue-700 border-blue-700
-                   dark:bg-blue-500 dark:hover:bg-blue-400 dark:border-blue-300
+                   dark:bg-blue-500 dark:hover:bg-blue-600 dark:border-blue-600
                    transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
                             <span wire:loading.remove>Mark as Ready</span>
                             <span wire:loading>Updating...</span>
@@ -84,7 +124,6 @@
                         </div>
                     @endif
                 </div>
-
 
                 <p class="mt-6 text-xs text-gray-400 dark:text-gray-500 italic text-right select-none">
                     Created: {{ $order->created_at->format('M d, Y') }}
