@@ -21,7 +21,7 @@ class OrderStatsOverview extends BaseWidget
 
         return [
             Stat::make('Total Orders', Order::count())
-                ->description('Total number of orders placed')
+                ->description('Total number of orders')
                 ->descriptionIcon('heroicon-o-shopping-cart', IconPosition::Before)
                 ->chart(
                     collect(range(0, 6))->map(function ($i) {
@@ -32,7 +32,7 @@ class OrderStatsOverview extends BaseWidget
                 ->color('primary'),
 
             Stat::make('Pending Orders', Order::where('status', 'pending')->count())
-                ->description('Orders that are yet to be processed')
+                ->description('Orders that are yet to be process')
                 ->descriptionIcon('heroicon-o-clock', IconPosition::Before)
                 ->chart(
                     collect(range(0, 6))->map(function ($i) {

@@ -2,8 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\OrderChartWidget;
-use App\Filament\Widgets\OrderStatsOverview;
 use App\Http\Middleware\RedirectIfNotAuthorized;
 use App\Http\Responses\LoginResponse;
 use Filament\Http\Middleware\Authenticate;
@@ -21,33 +19,31 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Auth;
 
-class AdminPanelProvider extends PanelProvider
+class KitchenPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
-            ->login()
-            ->authGuard('web')
-            ->brandName('Exo Kiosk')
+            ->id('kitchen')
+            ->path('kitchen')
+            // ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Emerald,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->authGuard('web')
+            ->topNavigation()
+            ->brandName('Exo Kitchen')
+            ->discoverResources(in: app_path('Filament/Kitchen/Resources'), for: 'App\\Filament\\Kitchen\\Resources')
+            ->discoverPages(in: app_path('Filament/Kitchen/Pages'), for: 'App\\Filament\\Kitchen\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Kitchen/Widgets'), for: 'App\\Filament\\Kitchen\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
-                OrderChartWidget::class,
-                OrderStatsOverview::class,
-
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -60,8 +56,6 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            ->databaseNotifications()
-            ->databaseNotificationsPolling('2s')
             ->authMiddleware([
                 Authenticate::class,
                 'web',

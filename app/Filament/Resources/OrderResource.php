@@ -198,8 +198,6 @@ class OrderResource extends Resource
 
                         return $record->status === 'pending';
                     })
-
-
                     ->form([
                         Placeholder::make('items')
                             ->label('Items')

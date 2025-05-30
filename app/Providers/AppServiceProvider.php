@@ -6,6 +6,9 @@ use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Http\Responses\Auth\LoginResponse as FilamentLoginResponse;
+use App\Http\Responses\LoginResponse as CustomLoginResponse;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,6 +18,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         parent::register();
+
+        $this->app->bind(FilamentLoginResponse::class, CustomLoginResponse::class);
 
         FilamentView::registerRenderHook('panels::head.end', fn() => Blade::render("@vite(['resources/css/app.css'])"));
 

@@ -11,14 +11,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\HasDatabaseNotifications;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * @method bool hasRole(string|array $roles)
+ */
 class User extends Authenticatable implements FilamentUser
 {
-
     use HasDatabaseNotifications, HasNotifications;
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -27,7 +30,15 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
-        return $this->is_admin;
+        if ($panel->getId() === 'admin') {
+            return $this->is_admin || $this->hasRole('kitchen');
+        }
+
+        if ($panel->getId() === 'kitchen') {
+            return $this->hasRole('kitchen');
+        }
+
+        return false;
     }
 
     public function getFilamentName(): string
