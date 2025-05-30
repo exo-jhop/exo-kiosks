@@ -8,7 +8,8 @@ use Illuminate\Support\ServiceProvider;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Http\Responses\Auth\LoginResponse as FilamentLoginResponse;
 use App\Http\Responses\LoginResponse as CustomLoginResponse;
-
+use App\Livewire\OrdersCardView;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,5 +30,8 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot() {}
+    public function boot()
+    {
+        Livewire::component('orders-card-view', OrdersCardView::class);
+    }
 }

@@ -2,10 +2,14 @@
 
 namespace App\Filament\Kitchen\Resources;
 
+use App\Filament\Kitchen\Pages\OrdersCardView;
 use App\Filament\Kitchen\Resources\OrderResource\Pages;
 use App\Filament\Kitchen\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use Filament\Forms;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -23,23 +27,79 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('total_price')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('status')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('pending'),
-                Forms\Components\TextInput::make('payment_method')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('payment_status')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('unpaid'),
-                Forms\Components\TextInput::make('order_number')
-                    ->required()
-                    ->maxLength(255),
+                Section::make()
+                    ->schema([
+                        Section::make(fn($record) => $record?->order_number ? "Order Number - #{$record->order_number}" : 'Order Details')
+                            ->description('Manage the details of this order')
+                            ->icon('heroicon-o-banknotes')
+                            ->iconColor('success')
+                            ->collapsible()
+                            ->schema([
+                                Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('total_price')
+                                            ->label('Total Amount')
+                                            ->required()
+                                            ->numeric()
+                                            ->prefix('₱')
+                                            ->prefixIcon('heroicon-m-currency-dollar')
+                                            ->extraAttributes([
+                                                'class' => 'text-lg font-semibold'
+                                            ])
+                                            ->step(0.01)
+                                            ->minValue(0)
+                                            ->placeholder('0.00'),
+                                        Select::make('payment_method')
+                                            ->label('Payment Method')
+                                            ->options([
+                                                'cash' => 'Cash Payment',
+                                                'card' => 'Credit/Debit Card',
+                                                'gcash' => 'GCash',
+                                                'paymaya' => 'PayMaya',
+                                                'bank_transfer' => 'Bank Transfer',
+                                            ])
+                                            ->default('cash')
+                                            ->required()
+                                            ->prefixIcon('heroicon-m-credit-card')
+                                            ->native(false)
+                                            ->searchable(),
+                                        Select::make('status')
+                                            ->label('Order Status')
+                                            ->options([
+                                                'pending' => 'Pending',
+                                                'preparing' => 'Preparing',
+                                                'on hold' => 'On Hold',
+                                                'completed' => 'Completed',
+                                                'canceled' => 'Canceled',
+                                            ])
+                                            ->prefixIcon('heroicon-m-clock')
+                                            ->native(false)
+                                            ->searchable()
+                                            ->suffixAction(
+                                                Forms\Components\Actions\Action::make('status_info')
+                                                    ->icon('heroicon-m-information-circle')
+                                                    ->color('gray')
+                                                    ->tooltip('View status descriptions')
+                                                    ->modalSubmitAction(false)
+                                                    ->modalCancelActionLabel('Close')
+                                            ),
+
+                                        Select::make('payment_status')
+                                            ->label('Payment Status')
+                                            ->options([
+                                                'paid' => 'Paid',
+                                                'unpaid' => 'Unpaid',
+                                                'partial' => 'Partially Paid',
+                                                'refunded' => 'Refunded',
+                                            ])
+                                            ->default('unpaid')
+                                            ->required()
+                                            ->prefixIcon('heroicon-m-banknotes')
+                                            ->native(false),
+                                    ])
+                            ]),
+                    ])
+                    ->columnSpanFull()
             ]);
     }
 
@@ -47,18 +107,25 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('order_number')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->badge()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('total_price')
                     ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('payment_method')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('payment_status')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('order_number')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -71,7 +138,8 @@ class OrderResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('Mark as Completed')
+                    ->icon('heroicon-o-check'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
