@@ -28,6 +28,7 @@ class KitchenPanelProvider extends PanelProvider
         return $panel
             ->id('kitchen')
             ->path('kitchen')
+            ->profile()
             // ->login()
             ->colors([
                 'primary' => Color::Emerald,
