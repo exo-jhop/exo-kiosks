@@ -83,6 +83,7 @@ class OrderResource extends Resource
                                             ->options([
                                                 'pending' => 'Pending',
                                                 'preparing' => 'Preparing',
+                                                'ready' => 'Ready',
                                                 'on hold' => 'On Hold',
                                                 'completed' => 'Completed',
                                                 'canceled' => 'Canceled',
@@ -247,7 +248,6 @@ class OrderResource extends Resource
                         }
 
                         $record->update([
-                            'status' => 'preparing',
                             'payment_status' => 'Paid',
                         ]);
 

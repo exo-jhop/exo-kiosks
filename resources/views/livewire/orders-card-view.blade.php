@@ -61,12 +61,12 @@
 
                 <div class="mt-6">
                     @if ($order->status !== 'ready')
-                        <button wire:click="markAsReady({{ $order->id }})" wire:loading.attr="disabled"
+                        <button wire:click="markAsPreparing({{ $order->id }})" wire:loading.attr="disabled"
                             class="w-full px-4 py-2 text-center font-semibold rounded-lg border
                                    bg-emerald-600 text-white hover:bg-emerald-700 border-emerald-700
                                    dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:border-emerald-300
                                    transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span wire:loading.remove>Mark as Ready</span>
+                            <span wire:loading.remove>Mark as Preparing</span>
                             <span wire:loading>Updating...</span>
                         </button>
                     @else

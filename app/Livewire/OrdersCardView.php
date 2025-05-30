@@ -12,12 +12,12 @@ class OrdersCardView extends Component
 
     protected $paginationTheme = 'tailwind';
 
-    public function markAsReady($orderId)
+    public function markAsPreparing($orderId)
     {
         $order = \App\Models\Order::find($orderId);
 
         if ($order && $order->status !== 'completed') {
-            $order->status = 'ready';
+            $order->status = 'preparing';
             $order->save();
         }
     }
@@ -26,6 +26,7 @@ class OrdersCardView extends Component
     {
         $orders = Order::with('orderItems.product')
             ->where('status', 'pending')
+            ->where('payment_status', 'paid')
             ->orderBy('created_at')
             ->paginate(12);
 
