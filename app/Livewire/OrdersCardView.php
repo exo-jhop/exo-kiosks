@@ -22,10 +22,20 @@ class OrdersCardView extends Component
         }
     }
 
+    public function markAsReady($orderId)
+    {
+        $order = Order::find($orderId);
+
+        if ($order && $order->status === 'preparing') {
+            $order->status = 'ready';
+            $order->save();
+        }
+    }
+
     public function render()
     {
         $orders = Order::with('orderItems.product')
-            ->where('status', 'pending')
+            ->whereIn('status', ['pending', 'preparing'])
             ->where('payment_status', 'paid')
             ->orderBy('created_at')
             ->paginate(12);

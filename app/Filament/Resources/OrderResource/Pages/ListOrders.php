@@ -28,6 +28,7 @@ class ListOrders extends ListRecords
         $statusMap = [
             'pending' => 'Pending',
             'preparing' => 'Preparing',
+            'ready' => 'Ready',
             'completed' => 'Completed',
             'on hold' => 'On Hold',
             'canceled' => 'Canceled',
