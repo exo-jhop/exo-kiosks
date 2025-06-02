@@ -110,15 +110,17 @@
                 <div class="mt-6">
                     @if ($order->status === 'pending')
                         <button wire:click="markAsPreparing({{ $order->id }})" wire:loading.attr="disabled"
+                             wire:target="markAsPreparing({{ $order->id }})"
                             class="w-full px-4 py-2 text-center font-semibold rounded-lg border
                    bg-yellow-500 text-white hover:bg-yellow-600 border-yellow-600
                    dark:bg-yellow-400 dark:hover:bg-yellow-500 dark:border-yellow-500
                    transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span wire:loading.remove>Mark as Preparing</span>
-                            <span wire:loading>Updating...</span>
+                            <span wire:loading.remove  wire:target="markAsPreparing({{ $order->id }})">Mark as Preparing</span>
+                            <span wire:loading wire:target="markAsPreparing({{ $order->id }})">Updating...</span>
                         </button>
                     @elseif ($order->status === 'preparing')
                         <button wire:click="markAsReady({{ $order->id }})" wire:loading.attr="disabled"
+                                wire:target="markAsReady({{ $order->id }})"
                             class="w-full px-4 py-2 text-center font-semibold rounded-lg border
                    bg-blue-600 text-white hover:bg-blue-700 border-blue-700
                    dark:bg-blue-500 dark:hover:bg-blue-600 dark:border-blue-600
