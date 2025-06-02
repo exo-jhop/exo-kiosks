@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\OrderResource\RelationManagers;
 
 use App\Filament\Resources\ProductResource\Pages\EditProduct;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -43,6 +44,9 @@ class OrderItemsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
+        $panel = Filament::getCurrentPanel();
+        $isKitchen = $panel && $panel->getId() === 'kitchen';
+
         return $table
             ->recordTitleAttribute('orderItem')
             ->columns([
@@ -50,7 +54,7 @@ class OrderItemsRelationManager extends RelationManager
                     ->label('Product Image')
                     ->alignCenter()
                     ->sortable()
-                    ->url(fn($record) => EditProduct::getUrl(['record' => $record->product_id]))
+                    ->url(fn($record) => $isKitchen ? null : EditProduct::getUrl(['record' => $record->product_id]))
                     ->square()
                     ->extraImgAttributes(['class' => 'rounded-md shadow-sm']),
 
@@ -58,7 +62,7 @@ class OrderItemsRelationManager extends RelationManager
                     ->label('Product Name')
                     ->searchable()
                     ->sortable()
-                    ->url(fn($record) => EditProduct::getUrl(['record' => $record->product_id]))
+                    ->url(fn($record) => $isKitchen ? null : EditProduct::getUrl(['record' => $record->product_id]))
                     ->toggleable()
                     ->wrap(),
 

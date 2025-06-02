@@ -1,102 +1,110 @@
-<div>
+<div wire:poll.2000ms id="orders-container">
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         @foreach ($orders as $order)
             <div
                 class="flex flex-col justify-between p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-lg dark:shadow-black/70
                        hover:shadow-xl dark:hover:shadow-black/90 transition-shadow duration-300 transform hover:-translate-y-1">
                 <div>
-                    <h3 class="font-extrabold text-2xl tracking-wide text-gray-900 dark:text-gray-100 mb-4">
-                        Order #{{ $order->order_number }}
-                    </h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-extrabold text-2xl tracking-wide text-gray-900 dark:text-gray-100">
+                            Order #{{ $order->order_number }}
+                        </h3>
+
+                        <span
+                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold shadow-sm
+                            {{ $order->status === 'completed'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100'
+                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100' }}">
+                            @if ($order->status === 'completed')
+                                ✅
+                            @else
+                                ⏳
+                            @endif
+                            {{ ucfirst($order->status) }}
+                        </span>
+                    </div>
 
                     @php
-                        $statuses = ['pending' => 0, 'preparing' => 1, 'ready' => 2];
+                        $steps = ['Pending', 'Preparing'];
+                        $statuses = ['pending' => 0, 'preparing' => 1];
                         $currentStep = $statuses[$order->status] ?? 0;
-                        $steps = ['Pending', 'Preparing', 'Ready'];
                     @endphp
 
                     <div class="flex justify-between items-center mt-4 mb-2">
                         @foreach ($steps as $index => $label)
-                            <div class="flex-1 flex items-center">
+                            <div class="flex-1 flex flex-col items-center">
                                 <div
                                     class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold
-                                    {{ $index < $currentStep
-                                        ? 'bg-green-500 text-white'
-                                        : ($index === $currentStep
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-gray-300') }}">
+                {{ $index < $currentStep
+                    ? 'bg-green-500 text-white'
+                    : ($index === $currentStep
+                        ? 'bg-blue-500 text-white animate-spin'
+                        : 'bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-gray-300') }}">
                                     @if ($index < $currentStep)
                                         ✓
+                                    @elseif ($index === $currentStep)
+                                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                                            fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor"
+                                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                        </svg>
                                     @else
                                         {{ $index + 1 }}
                                     @endif
                                 </div>
 
                                 @if ($index < count($steps) - 1)
-                                    <div
-                                        class="flex-1 h-1 mx-2
-                                        {{ $index < $currentStep ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600' }}">
+                                    <div class="flex-1 h-1 w-full mx-2 relative mt-2">
+                                        <div class="absolute inset-0 bg-gray-300 dark:bg-gray-600 rounded"></div>
+
+                                        @if ($index === 0 && $currentStep === 1)
+                                            <div class="absolute top-0 left-0 h-1 rounded bg-green-500"
+                                                style="width: 100%;"></div>
+                                        @elseif ($index < $currentStep)
+                                            <div class="absolute top-0 left-0 h-1 rounded bg-green-500 w-full"></div>
+                                        @endif
                                     </div>
                                 @endif
+
+                                <span
+                                    class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">{{ $label }}</span>
                             </div>
                         @endforeach
                     </div>
 
-                    <div class="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400 px-1">
-                        @foreach ($steps as $label)
-                            <span class="w-1/3 text-center">{{ $label }}</span>
-                        @endforeach
-                    </div>
-
-                    <p class="mt-4 mb-3 text-lg text-gray-700 dark:text-gray-300">
-                        <span class="font-semibold">Total Price:</span>
-                        <span class="text-indigo-600 dark:text-indigo-400 font-bold">
-                            ${{ number_format($order->total_price, 2) }}
-                        </span>
-                    </p>
-
                     @if ($order->orderItems->count())
                         <div class="mb-4">
-                            <p class="font-semibold text-gray-700 dark:text-gray-300 mb-1">Items:</p>
-                            <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="font-semibold text-gray-700 dark:text-gray-300">Items:</p>
+                                <button wire:click="resetCompletedItems"
+                                    class="text-sm text-red-600 dark:text-red-400 hover:underline">
+                                    Reset
+                                </button>
+                            </div>
+
+                            <ul class="space-y-2">
                                 @foreach ($order->orderItems as $item)
-                                    <li>
-                                        {{ $item->product->name ?? 'Unknown Product' }}
-                                        <span class="text-xs text-gray-500">
-                                            (x{{ $item->quantity }})
-                                            - ${{ number_format($item->subtotal, 2) }}
+                                    <li wire:click="toggleItem({{ $item->id }})" wire:loading.class="opacity-50"
+                                        class="flex justify-between items-center bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-md shadow-sm cursor-pointer transition hover:bg-green-100 dark:hover:bg-green-900">
+                                        <span class="font-semibold text-gray-800 dark:text-gray-100">
+                                            {{ $item->product->name ?? 'Unknown Product' }}
                                         </span>
+
+                                        @if (in_array($item->id, $completedItems))
+                                            <span class="text-green-600 dark:text-green-300 text-lg font-bold">✓</span>
+                                        @else
+                                            <span
+                                                class="inline-block text-xs font-bold bg-blue-200 text-blue-900 dark:bg-blue-700 dark:text-blue-100 px-2 py-0.5 rounded-full">
+                                                x{{ $item->quantity }}
+                                            </span>
+                                        @endif
                                     </li>
                                 @endforeach
                             </ul>
                         </div>
                     @endif
-
-                    <p class="mb-3">
-                        <span class="font-semibold text-gray-700 dark:text-gray-300">Status:</span>
-                        <span
-                            class="inline-block px-3 py-1 rounded-full text-sm font-semibold
-                            {{ $order->status === 'completed'
-                                ? 'bg-green-200 text-green-900 dark:bg-green-700 dark:text-green-200'
-                                : 'bg-yellow-200 text-yellow-900 dark:bg-yellow-700 dark:text-yellow-200' }}">
-                            {{ ucfirst($order->status) }}
-                        </span>
-                    </p>
-
-                    <p class="mb-3 text-gray-700 dark:text-gray-300">
-                        <span class="font-semibold">Payment Method:</span> {{ $order->payment_method }}
-                    </p>
-
-                    <p class="mb-1">
-                        <span class="font-semibold text-gray-700 dark:text-gray-300">Payment Status:</span>
-                        <span
-                            class="inline-block px-3 py-1 rounded-full text-sm font-semibold
-                            {{ $order->payment_status === 'paid'
-                                ? 'bg-green-200 text-green-900 dark:bg-green-700 dark:text-green-200'
-                                : 'bg-red-200 text-red-900 dark:bg-red-700 dark:text-red-200' }}">
-                            {{ ucfirst($order->payment_status) }}
-                        </span>
-                    </p>
                 </div>
 
                 <div class="mt-6">

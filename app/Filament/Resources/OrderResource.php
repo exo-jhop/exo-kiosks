@@ -167,10 +167,14 @@ class OrderResource extends Resource
                 Filter::make('created_at')
                     ->form([
                         Forms\Components\DatePicker::make('created_at')
-                            ->label('Order Date'),
+                            ->label('Order Date')
+                            ->default(Carbon::today()),
                     ])
                     ->query(function (Builder $query, array $data) {
-                        return $query->when($data['created_at'], fn($q) => $q->whereDate('created_at', $data['created_at']));
+                        return $query->when(
+                            $data['created_at'],
+                            fn($q) => $q->whereDate('created_at', $data['created_at'])
+                        );
                     }),
                 SelectFilter::make('status')
                     ->options([
@@ -291,5 +295,15 @@ class OrderResource extends Resource
             'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::whereDate('created_at', Carbon::today())->count();
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'The number of orders';
     }
 }

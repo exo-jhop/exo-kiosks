@@ -54,12 +54,13 @@ class OrderPlaced implements ShouldBroadcastNow
     }
     public function broadcastWith()
     {
-        return [
-            'id' => $this->order->id,
-            'order_number' => $this->order->order_number,
-            'total_price' => $this->order->total_price,
-            'status' => $this->order->status,
-        ];
+        // return [
+        //     'id' => $this->order->id,
+        //     'order_number' => $this->order->order_number,
+        //     'total_price' => $this->order->total_price,
+        //     'status' => $this->order->status,
+        // ];
+        return $this->order->load('orderItems.product')->toArray();
     }
     public function broadcastAs()
     {

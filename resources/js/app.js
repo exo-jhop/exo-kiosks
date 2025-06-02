@@ -11,5 +11,5 @@ window.Echo = new Echo({
 });
 
 window.Echo.channel("orders").listen(".order.placed", (e) => {
-    console.log("New Order:", e);
+    Livewire.emit("orderPlaced", e);
 });

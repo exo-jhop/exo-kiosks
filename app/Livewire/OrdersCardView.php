@@ -11,6 +11,28 @@ class OrdersCardView extends Component
     use WithPagination;
 
     protected $paginationTheme = 'tailwind';
+    public $completedItems = [];
+    protected $listeners = ['orderPlaced' => 'prependOrder'];
+
+    public function prependOrder($order)
+    {
+        $this->orders->prepend((object) $order);
+        // $this->render();
+    }
+
+    public function toggleItem($itemId)
+    {
+        if (in_array($itemId, $this->completedItems)) {
+            $this->completedItems = array_values(array_diff($this->completedItems, [$itemId]));
+        } else {
+            $this->completedItems[] = $itemId;
+        }
+    }
+
+    public function resetCompletedItems()
+    {
+        $this->completedItems = [];
+    }
 
     public function markAsPreparing($orderId)
     {

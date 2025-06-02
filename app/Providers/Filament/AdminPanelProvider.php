@@ -33,11 +33,15 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->authGuard('web')
             ->brandName('Exo Kiosk')
+            ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('2s')
+            ->broadcasting(true)
             ->pages([
                 Pages\Dashboard::class,
             ])
@@ -60,8 +64,6 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            ->databaseNotifications()
-            ->databaseNotificationsPolling('2s')
             ->authMiddleware([
                 Authenticate::class,
                 'web',

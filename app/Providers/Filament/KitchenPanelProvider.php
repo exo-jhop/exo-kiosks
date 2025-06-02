@@ -8,6 +8,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -33,7 +34,14 @@ class KitchenPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Emerald,
             ])
+            ->sidebarCollapsibleOnDesktop()
             ->authGuard('web')
+            ->userMenuItems([
+                MenuItem::make()
+                    ->label('Settings')
+                    // ->url(fn(): string => Settings::getUrl())
+                    ->icon('heroicon-o-cog-6-tooth'),
+            ])
             ->topNavigation()
             ->brandName('Exo Kitchen')
             ->discoverResources(in: app_path('Filament/Kitchen/Resources'), for: 'App\\Filament\\Kitchen\\Resources')

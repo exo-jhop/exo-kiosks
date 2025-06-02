@@ -6,6 +6,7 @@ use App\Filament\Kitchen\Pages\OrdersCardView;
 use App\Filament\Kitchen\Resources\OrderResource\Pages;
 use App\Filament\Kitchen\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
+use Illuminate\Support\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
@@ -13,6 +14,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -22,6 +25,8 @@ class OrderResource extends Resource
     protected static ?string $model = Order::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationLabel = 'Order List';
 
     public static function form(Form $form): Form
     {
@@ -136,7 +141,23 @@ class OrderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('created_at')
+                    ->form([
+                        Forms\Components\DatePicker::make('created_at')
+                            ->label('Order Date')
+                            ->default(Carbon::today()),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when(
+                            $data['created_at'],
+                            fn($q) => $q->whereDate('created_at', $data['created_at'])
+                        );
+                    }),
+                SelectFilter::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'completed' => 'Completed',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\Action::make('Mark as Completed')
@@ -160,8 +181,13 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
+            'view' => Pages\ViewOrder::route('/view/{record}'),
             'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
+    }
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::whereDate('created_at', Carbon::today())->count();
     }
 }
